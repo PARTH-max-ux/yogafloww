@@ -10,6 +10,9 @@ interface User {
   email: string;
   plan?: string;
   joinDate?: string;
+  classesAttended?: number;
+  hoursPracticed?: number;
+  streak?: number;
 }
 
 interface AuthContextType {
@@ -94,6 +97,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           const latestUserDoc = await getDoc(userRef);
           const latestData = latestUserDoc.data() as any;
+          
+          // Update local user state with all Firestore fields including stats
+          const updatedUserData: User = {
+            ...userData,
+            plan: latestData?.plan || userData.plan,
+            classesAttended: typeof latestData?.classesAttended === 'number' ? latestData.classesAttended : 0,
+            hoursPracticed: typeof latestData?.hoursPracticed === 'number' ? latestData.hoursPracticed : 0,
+            streak: typeof latestData?.streak === 'number' ? latestData.streak : 0,
+          };
+          setUser(updatedUserData);
+          localStorage.setItem('yogaFlowUser', JSON.stringify(updatedUserData));
+
           const roleAdmin =
             latestData?.role === 'admin' ||
             latestData?.isAdmin === true ||
@@ -189,13 +204,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setUser((prev) => {
           if (!prev) return null;
-          // Avoid unnecessary updates if plan hasn't changed
-          if (prev.plan === plan) {
+          // Avoid unnecessary updates if no relevant fields have changed
+          if (
+            prev.plan === plan &&
+            prev.classesAttended === (data.classesAttended || 0) &&
+            prev.hoursPracticed === (data.hoursPracticed || 0) &&
+            prev.streak === (data.streak || 0)
+          ) {
             return prev;
           }
           const updatedUser = {
             ...prev,
             plan: plan,
+            classesAttended: typeof data.classesAttended === 'number' ? data.classesAttended : 0,
+            hoursPracticed: typeof data.hoursPracticed === 'number' ? data.hoursPracticed : 0,
+            streak: typeof data.streak === 'number' ? data.streak : 0,
           };
           localStorage.setItem('yogaFlowUser', JSON.stringify(updatedUser));
           return updatedUser;

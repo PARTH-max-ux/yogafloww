@@ -42,6 +42,9 @@ interface UserData {
   roles?: string[];
   source: 'firebase' | 'localStorage';
   lastLogin?: string;
+  classesAttended?: number;
+  hoursPracticed?: number;
+  streak?: number;
 }
 
 interface ContactSubmission {
@@ -121,6 +124,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const [isSavingJourney, setIsSavingJourney] = useState(false);
   const [isJourneyStepModalOpen, setIsJourneyStepModalOpen] = useState(false);
   const [editingJourneyStepIndex, setEditingJourneyStepIndex] = useState<number | null>(null);
+  const [editingUserStats, setEditingUserStats] = useState<UserData | null>(null);
+  const [isUserStatsModalOpen, setIsUserStatsModalOpen] = useState(false);
 
   const sanitizeForFirestore = (value: any): any => {
     if (Array.isArray(value)) {
@@ -230,6 +235,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             isAdmin: data.isAdmin === true,
             roles: Array.isArray(data.roles) ? data.roles : undefined,
             lastLogin: data.lastLoginAt?.toDate?.()?.toISOString() || null,
+            classesAttended: typeof data.classesAttended === 'number' ? data.classesAttended : 0,
+            hoursPracticed: typeof data.hoursPracticed === 'number' ? data.hoursPracticed : 0,
+            streak: typeof data.streak === 'number' ? data.streak : 0,
             source: 'firebase' as const,
           };
         });
@@ -567,6 +575,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
     } catch (error: any) {
       console.error('❌ Error updating admin role:', error);
       alert(`Failed to update admin role: ${error?.message || 'Please try again.'}`);
+    }
+  };
+
+  const updateUserStats = async (userId: string, stats: { classesAttended: number; hoursPracticed: number; streak: number }) => {
+    try {
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, {
+        ...stats,
+        statsUpdatedAt: serverTimestamp(),
+      }, { merge: true });
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId
+            ? { ...u, ...stats }
+            : u
+        )
+      );
+      alert('User stats updated successfully!');
+    } catch (error: any) {
+      console.error('❌ Error updating user stats:', error);
+      alert(`Failed to update user stats: ${error?.message || 'Please try again.'}`);
     }
   };
 
@@ -1912,7 +1942,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                                     <button className="p-2 text-slate-400 hover:text-teal-600 transition-colors">
                                       <Eye size={16} />
                                     </button>
-                                    <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
+                                    <button
+                                      onClick={() => {
+                                        setEditingUserStats(user);
+                                        setIsUserStatsModalOpen(true);
+                                      }}
+                                      disabled={user.source !== 'firebase'}
+                                      title={user.source !== 'firebase' ? 'Only Firebase users can be updated' : 'Edit practice stats'}
+                                      className={`p-2 transition-colors ${
+                                        user.source !== 'firebase'
+                                          ? 'text-slate-200 cursor-not-allowed'
+                                          : 'text-slate-400 hover:text-blue-600'
+                                      }`}
+                                    >
                                       <Edit size={16} />
                                     </button>
                                     <button
@@ -3159,6 +3201,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         />
       )}
 
+      {isUserStatsModalOpen && editingUserStats && (
+        <UserStatsModal
+          user={editingUserStats}
+          onSave={updateUserStats}
+          onClose={() => {
+            setIsUserStatsModalOpen(false);
+            setEditingUserStats(null);
+          }}
+        />
+      )}
+
       {/* Instructor Form Modal */}
       {isInstructorFormOpen && (
         <InstructorFormModal
@@ -3382,6 +3435,99 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// User Stats Modal Component
+interface UserStatsModalProps {
+  user: UserData;
+  onSave: (userId: string, stats: { classesAttended: number; hoursPracticed: number; streak: number }) => void;
+  onClose: () => void;
+}
+
+const UserStatsModal: React.FC<UserStatsModalProps> = ({ user, onSave, onClose }) => {
+  const [formData, setFormData] = useState({
+    classesAttended: user.classesAttended || 0,
+    hoursPracticed: user.hoursPracticed || 0,
+    streak: user.streak || 0,
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(user.id, formData);
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full m-4 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-900">Edit Practice Stats</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <p className="text-sm font-medium text-slate-900 mb-1">{user.name}</p>
+            <p className="text-xs text-slate-500 mb-4">{user.email}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Classes Attended</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.classesAttended}
+              onChange={(e) => setFormData({ ...formData, classesAttended: parseInt(e.target.value) || 0 })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Hours Practiced</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.hoursPracticed}
+              onChange={(e) => setFormData({ ...formData, hoursPracticed: parseInt(e.target.value) || 0 })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Current Streak (Days)</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.streak}
+              onChange={(e) => setFormData({ ...formData, streak: parseInt(e.target.value) || 0 })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-bold transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-bold transition-colors"
+            >
+              Save Stats
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

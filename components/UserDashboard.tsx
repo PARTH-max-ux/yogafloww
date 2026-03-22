@@ -196,15 +196,8 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onBack, initialTab
         { id: 3, name: 'Natarajasana', englishName: 'Lord of the Dance Pose', level: 'Advanced', duration: '30-60 secs', image: 'https://images.unsplash.com/photo-1508704019882-f9cf40e475b4?auto=format&fit=crop&q=80&w=800' }
     ];
 
-    const upcomingClasses = [
-        { id: 1, title: 'Morning Vinyasa Flow', instructor: 'Elena Rodriguez', date: 'Tomorrow, 08:00 AM', duration: '60 min', type: 'Live Virtual' },
-        { id: 2, title: 'Deep Tissue Yin Yoga', instructor: 'Marcus Chen', date: 'Oct 24, 06:30 PM', duration: '75 min', type: 'Studio' }
-    ];
-
-    const pastClasses = [
-        { id: 3, title: 'Foundations of Hatha', instructor: 'Sarah Jenkins', date: 'Oct 18, 09:00 AM', duration: '60 min', type: 'Recorded' },
-        { id: 4, title: 'Chakra Balancing Meditation', instructor: 'David Kim', date: 'Oct 15, 07:00 PM', duration: '45 min', type: 'Live Virtual' }
-    ];
+    const pastClasses: any[] = [];
+    const upcomingClasses: any[] = [];
 
     return (
         <div className="min-h-screen bg-slate-50 pt-32 pb-24">
@@ -320,15 +313,15 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onBack, initialTab
                                             <h4 className="font-bold text-slate-900 mb-4">Practice Stats</h4>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="bg-teal-50 p-4 rounded-xl text-center">
-                                                    <p className="text-3xl font-serif font-bold text-teal-600 mb-1">24</p>
+                                                    <p className="text-3xl font-serif font-bold text-teal-600 mb-1">{user?.classesAttended || 0}</p>
                                                     <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Classes Attended</p>
                                                 </div>
                                                 <div className="bg-indigo-50 p-4 rounded-xl text-center">
-                                                    <p className="text-3xl font-serif font-bold text-indigo-600 mb-1">12</p>
+                                                    <p className="text-3xl font-serif font-bold text-indigo-600 mb-1">{user?.hoursPracticed || 0}</p>
                                                     <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Hours Practiced</p>
                                                 </div>
                                                 <div className="bg-rose-50 p-4 rounded-xl text-center col-span-2">
-                                                    <p className="text-3xl font-serif font-bold text-rose-600 mb-1">5</p>
+                                                    <p className="text-3xl font-serif font-bold text-rose-600 mb-1">{user?.streak || 0}</p>
                                                     <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">Current Streak (Days)</p>
                                                 </div>
                                             </div>
@@ -400,7 +393,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onBack, initialTab
                                             <Calendar size={20} className="text-teal-600" /> Upcoming Classes
                                         </h3>
                                         <div className="space-y-4">
-                                            {upcomingClasses.map((cls) => (
+                                            {upcomingClasses.length > 0 ? upcomingClasses.map((cls) => (
                                                 <div key={cls.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl border border-slate-100 bg-white hover:border-teal-200 hover:shadow-md transition-all gap-4">
                                                     <div className="flex items-start gap-4">
                                                         <div className="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600 shrink-0 mt-1">
@@ -421,7 +414,19 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onBack, initialTab
                                                         <Button variant="primary" size="sm" className="w-full sm:w-auto rounded-full">Join Room</Button>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            )) : (
+                                                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 text-slate-500">
+                                                    <p>No upcoming classes scheduled.</p>
+                                                    <Button variant="outline" size="sm" className="mt-4 rounded-full" onClick={() => {
+                                                        onBack();
+                                                        setTimeout(() => {
+                                                            document.getElementById('classes')?.scrollIntoView({ behavior: 'smooth' });
+                                                        }, 100);
+                                                    }}>
+                                                        Browse Schedule
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -430,7 +435,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onBack, initialTab
                                             <CheckCircle2 size={20} className="text-slate-400" /> Past Classes
                                         </h3>
                                         <div className="space-y-3">
-                                            {pastClasses.map((cls) => (
+                                            {pastClasses.length > 0 ? pastClasses.map((cls) => (
                                                 <div key={cls.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 shrink-0">
@@ -443,7 +448,11 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({ onBack, initialTab
                                                     </div>
                                                     <button className="text-teal-600 text-sm font-medium hover:underline">Watch Recording</button>
                                                 </div>
-                                            ))}
+                                            )) : (
+                                                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 text-slate-500">
+                                                    <p>No past classes yet. Start your journey today!</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

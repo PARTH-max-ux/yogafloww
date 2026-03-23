@@ -4741,7 +4741,7 @@ const JourneyStepModal: React.FC<JourneyStepModalProps> = ({ step, iconOptions, 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Title *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Class Title *</label>
             <input
               type="text"
               required
@@ -4749,6 +4749,18 @@ const JourneyStepModal: React.FC<JourneyStepModalProps> = ({ step, iconOptions, 
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Watch Link / Video URL (Optional)</label>
+            <input
+              type="url"
+              value={formData.videoUrl || ''}
+              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+              placeholder="e.g. https://youtube.com/watch?v=... or Zoom link"
+            />
+            <p className="mt-1 text-xs text-slate-500">If provided, the "Watch Now" button will link to this URL.</p>
           </div>
 
           <div>
@@ -4890,6 +4902,7 @@ const ClassFormModal: React.FC<ClassFormModalProps> = ({ classData, instructors,
         type: 'Hatha',
         focus: [''],
         category: 'live',
+        videoUrl: '',
       };
     }
 
@@ -4906,6 +4919,7 @@ const ClassFormModal: React.FC<ClassFormModalProps> = ({ classData, instructors,
       type: data.type || 'Hatha',
       focus,
       category: data.category || 'live',
+      videoUrl: data.videoUrl || '',
     };
   };
 
@@ -5109,6 +5123,18 @@ const ClassFormModal: React.FC<ClassFormModalProps> = ({ classData, instructors,
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Watch Link / Video URL (Optional)</label>
+            <input
+              type="url"
+              value={formData.videoUrl || ''}
+              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+              placeholder="e.g. https://youtube.com/watch?v=... or Zoom link"
+            />
+            <p className="mt-1 text-xs text-slate-500">If provided, the "Watch Now" button will link to this URL.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

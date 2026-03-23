@@ -274,9 +274,9 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
 
                           {/* Action */}
                           <div className="md:w-48 text-right pt-4 md:pt-0 border-t md:border-t-0 border-slate-50">
-                            {classVideos[cls.id] ? (
+                            {cls.videoUrl || classVideos[cls.id] ? (
                               <a 
-                                href={classVideos[cls.id]}
+                                href={cls.videoUrl || classVideos[cls.id]}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0"
@@ -329,9 +329,9 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
                                    <span key={f} className="text-[8px] md:text-[9px] font-bold text-slate-500 uppercase tracking-tighter">#{f}</span>
                                  ))}
                                </div>
-                               {classVideos[cls.id] ? (
+                               {cls.videoUrl || classVideos[cls.id] ? (
                                  <a 
-                                   href={classVideos[cls.id]}
+                                   href={cls.videoUrl || classVideos[cls.id]}
                                    target="_blank"
                                    rel="noopener noreferrer"
                                    className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:translate-x-1 transition-transform flex items-center gap-1"

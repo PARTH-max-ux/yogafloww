@@ -84,6 +84,7 @@ export interface YogaClass {
   time?: string;
   type: 'Hatha' | 'Vinyasa' | 'Meditation' | 'Mobility';
   focus: string[];
+  videoUrl?: string;
   deleted?: boolean;
 }
 

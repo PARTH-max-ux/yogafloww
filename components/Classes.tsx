@@ -7,6 +7,8 @@ import { YogaClass } from '../types';
 import { getSettings } from '../utils/settings';
 import { db } from '../config/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
+import { Lock } from 'lucide-react';
 
 interface ClassesProps {
   initialTab?: 'live' | 'recorded';
@@ -14,6 +16,7 @@ interface ClassesProps {
 }
 
 export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome }) => {
+  const { user, isAdmin, isAdminChecking } = useAuth();
   const [activeTab, setActiveTab] = useState<'live' | 'recorded'>(initialTab);
   const [filterType, setFilterType] = useState<string>('All Types');
   const [filterLevel, setFilterLevel] = useState<string>('All Levels');
@@ -23,6 +26,13 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
   const [classVideos, setClassVideos] = useState<Record<string, string>>({}); // classId -> videoUrl
   const [liveClasses, setLiveClasses] = useState<YogaClass[]>(LIVE_CLASSES);
   const [recordedClasses, setRecordedClasses] = useState<YogaClass[]>(RECORDED_CLASSES);
+
+  const isSubscribed = useMemo(() => {
+    if (isAdmin) return true;
+    if (!user?.plan) return false;
+    // Any plan other than "Free Plan" is considered subscribed
+    return user.plan !== 'Free Plan';
+  }, [user?.plan, isAdmin]);
 
   // Update activeTab when initialTab prop changes
   useEffect(() => {
@@ -146,10 +156,10 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
         </div>
       </section>
 
-      {/* COMING SOON OVERLAY - Controlled by admin settings */}
+      {/* COMING SOON OR SUBSCRIPTION OVERLAY - Controlled by admin settings and user plan */}
       <div className="relative min-h-[600px]">
-        {/* Content Area - only blur and disable interaction if coming soon is enabled */}
-        <div className={`${showComingSoon ? 'pointer-events-none select-none blur-sm' : ''}`}>
+        {/* Content Area - only blur and disable interaction if coming soon or not subscribed is enabled */}
+        <div className={`${(showComingSoon || !isSubscribed) ? 'pointer-events-none select-none blur-sm' : ''}`}>
           {/* 2. NAVIGATION & SEARCH BAR */}
           <div className="sticky top-[64px] md:top-[72px] z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
@@ -408,7 +418,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
         </div>
 
         {/* Coming Soon Overlay - Only show if enabled in settings */}
-        {showComingSoon && (
+        {showComingSoon ? (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-md">
             <Reveal>
               <div className="text-center px-6 py-12 md:py-20">
@@ -424,9 +434,35 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
               </div>
             </Reveal>
           </div>
-        )}
+        ) : !isSubscribed ? (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-md">
+            <Reveal>
+              <div className="text-center px-6 py-12 md:py-20 max-w-2xl mx-auto">
+                <div className="inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full bg-teal-100 mb-6 md:mb-8">
+                  <Lock className="text-teal-600" size={40} />
+                </div>
+                <h2 className="text-4xl md:text-6xl font-serif font-bold text-slate-900 mb-4 md:mb-6">
+                  Premium <span className="text-teal-600 italic">Access Only.</span>
+                </h2>
+                <p className="text-lg md:text-xl text-slate-600 mb-10 font-light leading-relaxed">
+                  Daily live flows and archives are reserved for our community members. Choose a plan to unlock your practice.
+                </p>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleJoinJourney}
+                    variant="primary" 
+                    size="lg" 
+                    className="rounded-full bg-teal-600 text-white hover:bg-teal-500 px-10 md:px-14 py-4 md:py-6 shadow-2xl transition-all duration-300 font-bold tracking-[0.2em] text-sm md:text-base active:scale-95"
+                  >
+                    Unlock All Classes
+                  </Button>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        ) : null}
       </div>
-      {/* END COMING SOON OVERLAY - Controlled by admin settings */}
+      {/* END OVERLAYS */}
 
       {/* 5. CTA SECTION - REFINED FOR VISIBILITY */}
       <section className="px-4 md:px-6 pb-20 md:pb-32">

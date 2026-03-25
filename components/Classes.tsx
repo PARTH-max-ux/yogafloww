@@ -295,7 +295,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
                                   rel="noopener noreferrer"
                                   className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0"
                                 >
-                                  Watch Video <Play size={14} />
+                                  Enter Studio <Play size={14} />
                                 </a>
                               ) : (
                                 <button className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0">

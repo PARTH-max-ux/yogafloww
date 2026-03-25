@@ -148,8 +148,8 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
 
       {/* COMING SOON OVERLAY - Controlled by admin settings */}
       <div className="relative min-h-[600px]">
-        {/* Blurred Background Content - only blur if coming soon is enabled */}
-        <div className={`pointer-events-none select-none ${showComingSoon ? 'blur-sm' : ''}`}>
+        {/* Content Area - only blur and disable interaction if coming soon is enabled */}
+        <div className={`${showComingSoon ? 'pointer-events-none select-none blur-sm' : ''}`}>
           {/* 2. NAVIGATION & SEARCH BAR */}
           <div className="sticky top-[64px] md:top-[72px] z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
@@ -256,7 +256,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
                               </div>
                               {finalVideoUrl ? (
                                 <a 
-                                  href={finalVideoUrl}
+                                  href={ensureAbsoluteUrl(finalVideoUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="block text-lg md:text-3xl font-serif font-bold text-slate-900 hover:text-teal-600 transition-colors leading-tight"
@@ -290,7 +290,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
                             <div className="md:w-48 text-right pt-4 md:pt-0 border-t md:border-t-0 border-slate-50">
                               {finalVideoUrl ? (
                                 <a 
-                                  href={finalVideoUrl}
+                                  href={ensureAbsoluteUrl(finalVideoUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0"
@@ -317,7 +317,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
                           <div className="group relative flex flex-col">
                             {finalVideoUrl ? (
                               <a 
-                                href={finalVideoUrl}
+                                href={ensureAbsoluteUrl(finalVideoUrl)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="relative aspect-[16/10] bg-slate-50 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden mb-5 md:mb-8 border border-slate-50 shadow-sm hover:shadow-xl transition-all duration-700 block cursor-pointer"
@@ -359,7 +359,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
                               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Archive Session</p>
                               {finalVideoUrl ? (
                                 <a 
-                                  href={finalVideoUrl}
+                                  href={ensureAbsoluteUrl(finalVideoUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="block text-xl md:text-3xl font-serif font-bold text-slate-900 group-hover:text-teal-600 transition-colors leading-tight"
@@ -380,7 +380,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
                                  </div>
                                  {finalVideoUrl ? (
                                    <a 
-                                     href={finalVideoUrl}
+                                     href={ensureAbsoluteUrl(finalVideoUrl)}
                                      target="_blank"
                                      rel="noopener noreferrer"
                                      className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:translate-x-1 transition-transform flex items-center gap-1"
@@ -481,6 +481,16 @@ const EmptyState = ({ onReset }: { onReset: () => void }) => (
     </button>
   </div>
 );
+
+// Helper to ensure URL is absolute
+const ensureAbsoluteUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('www.')) return `https://${url}`;
+  // For anything else that looks like a domain but lacks protocol
+  if (url.includes('.') && !url.includes(' ')) return `https://${url}`;
+  return url;
+};
 
 interface DropdownProps {
   label: string;

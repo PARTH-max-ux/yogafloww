@@ -552,7 +552,7 @@ export const Pricing: React.FC<PricingProps> = ({ onShowLogin }) => {
           <div className="mt-24 text-center">
               <div className="inline-block px-8 py-6 bg-teal-50/50 rounded-3xl border border-teal-100 max-w-2xl">
                 <p className="text-slate-600 text-sm leading-relaxed">
-                  Need extra guidance? 1-on-1 private sessions available for members at{' '}
+                  Enquire for 1-on-1 personal sessions
                   <button
                     type="button"
                     onClick={() => alert('We will revert back in 2–3 days.')}

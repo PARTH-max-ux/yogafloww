@@ -553,13 +553,13 @@ export const Pricing: React.FC<PricingProps> = ({ onShowLogin }) => {
               <div className="inline-block px-8 py-6 bg-teal-50/50 rounded-3xl border border-teal-100 max-w-2xl">
                 <p className="text-slate-600 text-sm leading-relaxed">
                   Enquire for 1-on-1 personal sessions
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => alert('We will revert back in 2–3 days.')}
                     className="font-bold text-slate-900 border-b-2 border-teal-200 pb-0.5"
                   >
                     $19/hr
-                  </button>
+                  </button> */}
                   .
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-6">

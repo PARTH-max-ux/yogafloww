@@ -59,6 +59,7 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
           .map(doc => {
             const data = doc.data() as any;
             return {
+              id: doc.id,
               ...data,
               category: data.category || (data.time ? 'live' : 'recorded'),
             } as YogaClass & { category: 'live' | 'recorded' };
@@ -225,129 +226,178 @@ export const Classes: React.FC<ClassesProps> = ({ initialTab = 'live', onNavHome
               {filteredClasses.length > 0 ? (
                 activeTab === 'live' ? (
                   <div className="space-y-4 md:space-y-6">
-                    {filteredClasses.map((cls, idx) => (
-                      <Reveal key={cls.id} delay={idx * 0.05}>
-                        <div className="group relative bg-white hover:bg-slate-50/50 rounded-2xl md:rounded-[2rem] p-5 md:p-10 border border-slate-100 transition-all duration-700 flex flex-col md:flex-row md:items-center gap-4 md:gap-8 overflow-hidden shadow-sm hover:shadow-md">
-                          {/* Interaction Background Glow */}
-                          <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-teal-200 opacity-0 group-hover:opacity-10 transition-opacity blur-2xl pointer-events-none"></div>
-                          
-                          {/* Time Indicator */}
-                          <div className="md:w-32 shrink-0 border-b md:border-b-0 md:border-r border-slate-100 pb-3 md:pb-0 md:pr-8">
-                            <p className="text-2xl md:text-4xl font-serif font-bold text-slate-900 group-hover:text-teal-600 transition-colors">
-                              {cls.time?.split(' ')[0]}
-                              <span className="text-xs uppercase ml-1 opacity-40">{cls.time?.split(' ')[1]}</span>
-                            </p>
-                            <span className="text-[9px] uppercase font-bold tracking-[0.1em] text-slate-400">Local Time (IST)</span>
-                          </div>
+                    {filteredClasses.map((cls, idx) => {
+                      const finalVideoUrl = cls.videoUrl || classVideos[cls.id];
+                      return (
+                        <Reveal key={cls.id} delay={idx * 0.05}>
+                          <div className="group relative bg-white hover:bg-slate-50/50 rounded-2xl md:rounded-[2rem] p-5 md:p-10 border border-slate-100 transition-all duration-700 flex flex-col md:flex-row md:items-center gap-4 md:gap-8 overflow-hidden shadow-sm hover:shadow-md">
+                            {/* Interaction Background Glow */}
+                            <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-teal-200 opacity-0 group-hover:opacity-10 transition-opacity blur-2xl pointer-events-none"></div>
+                            
+                            {/* Time Indicator */}
+                            <div className="md:w-32 shrink-0 border-b md:border-b-0 md:border-r border-slate-100 pb-3 md:pb-0 md:pr-8">
+                              <p className="text-2xl md:text-4xl font-serif font-bold text-slate-900 group-hover:text-teal-600 transition-colors">
+                                {cls.time?.split(' ')[0]}
+                                <span className="text-xs uppercase ml-1 opacity-40">{cls.time?.split(' ')[1]}</span>
+                              </p>
+                              <span className="text-[9px] uppercase font-bold tracking-[0.1em] text-slate-400">Local Time (IST)</span>
+                            </div>
 
-                          {/* Class Info */}
-                          <div className="flex-1 space-y-2">
-                            <div className="flex flex-wrap gap-2 items-center">
-                              <span className="text-teal-600 text-[9px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-teal-50 rounded">
-                                {cls.type}
-                              </span>
-                              <span className="w-1 h-1 rounded-full bg-slate-200"></span>
-                              <span className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
-                                {cls.duration}
-                              </span>
+                            {/* Class Info */}
+                            <div className="flex-1 space-y-2">
+                              <div className="flex flex-wrap gap-2 items-center">
+                                <span className="text-teal-600 text-[9px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-teal-50 rounded">
+                                  {cls.type}
+                                </span>
+                                <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+                                <span className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
+                                  {cls.duration}
+                                </span>
+                              </div>
+                              {finalVideoUrl ? (
+                                <a 
+                                  href={finalVideoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block text-lg md:text-3xl font-serif font-bold text-slate-900 hover:text-teal-600 transition-colors leading-tight"
+                                >
+                                  {cls.title}
+                                </a>
+                              ) : (
+                                <h3 className="text-lg md:text-3xl font-serif font-bold text-slate-900 leading-tight">
+                                  {cls.title}
+                                </h3>
+                              )}
+                              <div className="flex flex-wrap gap-3">
+                                {cls.focus.map(f => (
+                                  <span key={f} className="text-[10px] md:text-[11px] text-slate-500 font-light italic">#{f.toLowerCase()}</span>
+                                ))}
+                              </div>
                             </div>
-                            <h3 className="text-lg md:text-3xl font-serif font-bold text-slate-900 leading-tight">
-                              {cls.title}
-                            </h3>
-                            <div className="flex flex-wrap gap-3">
-                              {cls.focus.map(f => (
-                                <span key={f} className="text-[10px] md:text-[11px] text-slate-500 font-light italic">#{f.toLowerCase()}</span>
-                              ))}
-                            </div>
-                          </div>
 
-                          {/* Instructor Profile */}
-                          <div className="flex items-center gap-4 md:px-8 md:border-l md:border-slate-100 pt-2 md:pt-0">
-                            <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-slate-900 flex items-center justify-center text-white text-[10px] md:text-xs font-bold font-serif shadow-lg group-hover:bg-teal-600 transition-colors shrink-0">
-                              {cls.instructor.split(' ').map(n => n[0]).join('')}
+                            {/* Instructor Profile */}
+                            <div className="flex items-center gap-4 md:px-8 md:border-l md:border-slate-100 pt-2 md:pt-0">
+                              <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-slate-900 flex items-center justify-center text-white text-[10px] md:text-xs font-bold font-serif shadow-lg group-hover:bg-teal-600 transition-colors shrink-0">
+                                {cls.instructor.split(' ').map(n => n[0]).join('')}
+                              </div>
+                              <div>
+                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Instructor</p>
+                                <p className="text-xs md:text-sm font-medium text-slate-800">{cls.instructor}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Instructor</p>
-                              <p className="text-xs md:text-sm font-medium text-slate-800">{cls.instructor}</p>
-                            </div>
-                          </div>
 
-                          {/* Action */}
-                          <div className="md:w-48 text-right pt-4 md:pt-0 border-t md:border-t-0 border-slate-50">
-                            {cls.videoUrl || classVideos[cls.id] ? (
-                              <a 
-                                href={cls.videoUrl || classVideos[cls.id]}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0"
-                              >
-                                Watch Video <Play size={14} />
-                              </a>
-                            ) : (
-                              <button className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0">
-                                Enter Studio <ExternalLink size={14} />
-                              </button>
-                            )}
+                            {/* Action */}
+                            <div className="md:w-48 text-right pt-4 md:pt-0 border-t md:border-t-0 border-slate-50">
+                              {finalVideoUrl ? (
+                                <a 
+                                  href={finalVideoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0"
+                                >
+                                  Watch Video <Play size={14} />
+                                </a>
+                              ) : (
+                                <button className="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.1em] md:tracking-[0.2em] text-teal-600 hover:text-teal-800 group-hover:translate-x-1 transition-all py-1 md:py-0">
+                                  Enter Studio <ExternalLink size={14} />
+                                </button>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </Reveal>
-                    ))}
+                        </Reveal>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 md:gap-x-10 gap-y-12">
-                    {filteredClasses.map((cls, idx) => (
-                      <Reveal key={cls.id} delay={idx * 0.1}>
-                        <div className="group relative flex flex-col">
-                          <div className="relative aspect-[16/10] bg-slate-50 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden mb-5 md:mb-8 border border-slate-50 shadow-sm hover:shadow-xl transition-all duration-700">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-teal-600/5 to-transparent"></div>
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-sm">
-                               <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-white flex items-center justify-center text-teal-600 shadow-2xl scale-75 group-hover:scale-100 transition-transform duration-500">
-                                 <Play fill="currentColor" size={24} />
-                               </div>
-                            </div>
-                            <div className="absolute top-4 left-4 flex gap-2">
-                               <span className="px-2 py-1 bg-white/90 backdrop-blur-md rounded-full text-[8px] font-bold uppercase tracking-widest text-slate-700 shadow-sm border border-white/50">
-                                 {cls.type}
-                               </span>
-                            </div>
-                            <div className="absolute bottom-4 left-4">
-                               <span className="text-[9px] font-bold uppercase tracking-widest text-slate-700/60 md:text-white/80 drop-shadow-sm md:drop-shadow-md">
-                                 {cls.duration} • {cls.level}
-                               </span>
-                            </div>
-                          </div>
+                    {filteredClasses.map((cls, idx) => {
+                      const finalVideoUrl = cls.videoUrl || classVideos[cls.id];
+                      return (
+                        <Reveal key={cls.id} delay={idx * 0.1}>
+                          <div className="group relative flex flex-col">
+                            {finalVideoUrl ? (
+                              <a 
+                                href={finalVideoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="relative aspect-[16/10] bg-slate-50 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden mb-5 md:mb-8 border border-slate-50 shadow-sm hover:shadow-xl transition-all duration-700 block cursor-pointer"
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-tr from-teal-600/5 to-transparent"></div>
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-sm">
+                                   <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-white flex items-center justify-center text-teal-600 shadow-2xl scale-75 group-hover:scale-100 transition-transform duration-500">
+                                     <Play fill="currentColor" size={24} />
+                                   </div>
+                                </div>
+                                <div className="absolute top-4 left-4 flex gap-2">
+                                   <span className="px-2 py-1 bg-white/90 backdrop-blur-md rounded-full text-[8px] font-bold uppercase tracking-widest text-slate-700 shadow-sm border border-white/50">
+                                     {cls.type}
+                                   </span>
+                                </div>
+                                <div className="absolute bottom-4 left-4">
+                                   <span className="text-[9px] font-bold uppercase tracking-widest text-slate-700/60 md:text-white/80 drop-shadow-sm md:drop-shadow-md">
+                                     {cls.duration} • {cls.level}
+                                   </span>
+                                </div>
+                              </a>
+                            ) : (
+                              <div className="relative aspect-[16/10] bg-slate-50 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden mb-5 md:mb-8 border border-slate-50 shadow-sm transition-all duration-700">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-teal-600/5 to-transparent"></div>
+                                <div className="absolute top-4 left-4 flex gap-2">
+                                   <span className="px-2 py-1 bg-white/90 backdrop-blur-md rounded-full text-[8px] font-bold uppercase tracking-widest text-slate-700 shadow-sm border border-white/50">
+                                     {cls.type}
+                                   </span>
+                                </div>
+                                <div className="absolute bottom-4 left-4">
+                                   <span className="text-[9px] font-bold uppercase tracking-widest text-slate-700/60 md:text-white/80 drop-shadow-sm md:drop-shadow-md">
+                                     {cls.duration} • {cls.level}
+                                   </span>
+                                </div>
+                              </div>
+                            )}
 
-                          <div className="px-2 space-y-2 md:space-y-3">
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Archive Session</p>
-                            <h3 className="text-xl md:text-3xl font-serif font-bold text-slate-900 group-hover:text-teal-600 transition-colors leading-tight">
-                              {cls.title}
-                            </h3>
-                            <p className="text-xs md:text-sm font-light text-slate-600">{cls.instructor}</p>
-                            <div className="pt-4 flex items-center justify-between border-t border-slate-50">
-                               <div className="flex gap-2">
-                                 {cls.focus.slice(0, 2).map(f => (
-                                   <span key={f} className="text-[8px] md:text-[9px] font-bold text-slate-500 uppercase tracking-tighter">#{f}</span>
-                                 ))}
-                               </div>
-                               {cls.videoUrl || classVideos[cls.id] ? (
-                                 <a 
-                                   href={cls.videoUrl || classVideos[cls.id]}
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:translate-x-1 transition-transform flex items-center gap-1"
-                                 >
-                                   Watch <Play size={12} />
-                                 </a>
-                               ) : (
-                                 <button className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:translate-x-1 transition-transform">
-                                   Watch Session
-                                 </button>
-                               )}
+                            <div className="px-2 space-y-2 md:space-y-3">
+                              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Archive Session</p>
+                              {finalVideoUrl ? (
+                                <a 
+                                  href={finalVideoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block text-xl md:text-3xl font-serif font-bold text-slate-900 group-hover:text-teal-600 transition-colors leading-tight"
+                                >
+                                  {cls.title}
+                                </a>
+                              ) : (
+                                <h3 className="text-xl md:text-3xl font-serif font-bold text-slate-900 group-hover:text-teal-600 transition-colors leading-tight">
+                                  {cls.title}
+                                </h3>
+                              )}
+                              <p className="text-xs md:text-sm font-light text-slate-600">{cls.instructor}</p>
+                              <div className="pt-4 flex items-center justify-between border-t border-slate-50">
+                                 <div className="flex gap-2">
+                                   {cls.focus.slice(0, 2).map(f => (
+                                     <span key={f} className="text-[8px] md:text-[9px] font-bold text-slate-500 uppercase tracking-tighter">#{f}</span>
+                                   ))}
+                                 </div>
+                                 {finalVideoUrl ? (
+                                   <a 
+                                     href={finalVideoUrl}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:translate-x-1 transition-transform flex items-center gap-1"
+                                   >
+                                     Watch <Play size={12} />
+                                   </a>
+                                 ) : (
+                                   <button className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:translate-x-1 transition-transform cursor-default opacity-50">
+                                     Coming Soon
+                                   </button>
+                                 )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Reveal>
-                    ))}
+                        </Reveal>
+                      );
+                    })}
                   </div>
                 )
               ) : (

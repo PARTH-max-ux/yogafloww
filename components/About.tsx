@@ -157,7 +157,7 @@ export const About: React.FC<AboutProps> = ({ onContactClick }) => {
               size="lg" 
               className="rounded-full flex items-center gap-3 mx-auto px-10"
             >
-              Talk to a Guide <MessageCircle size={20} />
+              Talk to a Gu <MessageCircle size={20} />
             </Button>
           </Reveal>
         </div>
